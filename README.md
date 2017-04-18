@@ -1,2 +1,2 @@
 # Arduino
-collection of embedded arduino examples and projects 
+*** collection of embedded arduino examples and projects ***  
