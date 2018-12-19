@@ -15,7 +15,7 @@ const byte downBtn = 9 ;
 const byte player1Btn = 11 ;
 const byte player2Btn = 12 ;
 byte pressCount = 0 ;
-
+boolean oneTimePerPress = true;
 /* time variables */
 byte minutes = 0 ;
 byte minutes2 = 0 ;
@@ -34,9 +34,10 @@ void start ()
   lcd.print(minutes + String(":") + String("00") );
   lcd.setCursor(10, 1);
   lcd.print(minutes + String(":") + String("00") );
-  minutes = minutes2 = index - 1 ;
-  seconds = (bonusTime + seconds) - 60 ; 
-  seconds2 = (bonusTime + seconds2) - 60 ; 
+  if (bonusTime != 0)minutes = minutes2 = index ;
+  else minutes = minutes2 = index -1 ; 
+  //seconds = (bonusTime + seconds) - 60 ; 
+  //seconds2 = (bonusTime + seconds2) - 60 ; 
 }
 
 
@@ -179,16 +180,7 @@ void loop()
 
   if (digitalRead(player1Btn) == LOW)
   {
-    char oneTimePerPress =0;
-    do {
-    if ((((bonusTime + seconds)%bonusTime)<60))  seconds += bonusTime ;
-      else 
-      {
-        minutes++ ; 
-        seconds =(seconds+bonusTimes)%60; 
-      }
-      oneTimePerPress ++ ; 
-      }while(oneTimePerPress = 0);
+    
     while (digitalRead(player1Btn) == LOW);
     digitalWrite(13, !digitalRead(13));
     if (counter1 == 0 )
@@ -204,6 +196,13 @@ void loop()
         
         else
         {
+          
+          while (oneTimePerPress) {
+              if ((((bonusTime + seconds)%bonusTime)<60))  seconds =(seconds+bonusTime)%60 ;
+              else {minutes++ ;   seconds =(seconds+bonusTime)%60;}
+              oneTimePerPress = false ; 
+             } 
+          
           delay(1000);
           lcd.setCursor(1, 1);
           lcd.print(minutes + String(":") + seconds-- );
@@ -222,6 +221,7 @@ void loop()
       counter1 = 0 ;
       lcd.setCursor(1, 1);
       lcd.print(minutes + String(":") + seconds );
+      oneTimePerPress = true ; 
     }
 
   }
