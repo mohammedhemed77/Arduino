@@ -15,12 +15,13 @@ const byte downBtn = 9 ;
 const byte player1Btn = 11 ;
 const byte player2Btn = 12 ;
 byte pressCount = 0 ;
-boolean oneTimePerPress = true;
+boolean bonusFlag1 = true;
+boolean bonusFlag2 = true;
 /* time variables */
 byte minutes = 0 ;
 byte minutes2 = 0 ;
-byte seconds = 59 ;
-byte seconds2 = 59 ;
+byte seconds = 60 ;
+byte seconds2 = 60 ;
 long int timePassed = 0 ;
 const long int timeToSleep = 10 ;
 byte bonusTime = 0 ;
@@ -35,9 +36,9 @@ void start ()
   lcd.setCursor(10, 1);
   lcd.print(minutes + String(":") + String("00") );
   if (bonusTime != 0)minutes = minutes2 = index ;
-  else minutes = minutes2 = index -1 ; 
-  //seconds = (bonusTime + seconds) - 60 ; 
-  //seconds2 = (bonusTime + seconds2) - 60 ; 
+  else minutes = minutes2 = index - 1 ;
+  //seconds = (bonusTime + seconds) - 60 ;
+  //seconds2 = (bonusTime + seconds2) - 60 ;
 }
 
 
@@ -55,7 +56,7 @@ void setup()
   lcd.begin(16, 2);
 
   /* initilaization msg */
-
+  /***********************/
   for (byte a = 0 ; a < 5 ; a++)
   {
     lcd.setCursor(0, 0);
@@ -68,11 +69,11 @@ void setup()
     delay(100);
   }
   /* clear the screen */
-//  lcd.setCursor(0, 0);
-//  lcd.print("                ");
-//  lcd.setCursor(0, 1);
-//  lcd.print("                ");
-  lcd.clear(); 
+  //  lcd.setCursor(0, 0);
+  //  lcd.print("                ");
+  //  lcd.setCursor(0, 1);
+  //  lcd.print("                ");
+  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print ("Select time");
   lcd.setCursor(0, 1);
@@ -80,24 +81,12 @@ void setup()
 
   /* while user don't press any button */
   /* ------------------------------------ */
-  while (digitalRead(enterBtn) && digitalRead(upBtn) && digitalRead(downBtn))
-  {
-    timePassed = millis() / 1000;
-    if (timePassed >= timeToSleep)
-    {
-      /* turn off lcd light */
-      digitalWrite(backLight, LOW);
-      set_sleep_mode(SLEEP_MODE_PWR_DOWN);   // sleep mode is set here
-      sleep_enable();
-      sleep_mode();
-    }
-  }
-
+  goToSleep();  
 }
 
 void loop()
 {
-   
+
   digitalWrite (backLight, HIGH);
   if (digitalRead(downBtn) == LOW )
   {
@@ -108,7 +97,7 @@ void loop()
       lcd.print("                ");
       lcd.setCursor(0, 1);
       lcd.print(String ("* ") + --index + String(" mins"));
-      if (index == 1) index = 90 ;
+      if (index == 0) index = 90 ;
     }
     else
     {
@@ -129,7 +118,7 @@ void loop()
       lcd.print("                ");
       lcd.setCursor(0, 1);
       lcd.print(String("* ") + ++index + String(" mins"));
-      if (index == 90) index = 1 ;
+      if (index == 90) index = 0 ;
     }
     else
     {
@@ -164,7 +153,7 @@ void loop()
       lcd.print(String("time : ") + minutes + String(" + ") + bonusTime);
       lcd.setCursor(0, 1);
       lcd.print("Enter to start");
-      
+
       pressCount ++ ;
     }
     else if (pressCount == 2)
@@ -180,37 +169,40 @@ void loop()
 
   if (digitalRead(player1Btn) == LOW)
   {
-    
+
     while (digitalRead(player1Btn) == LOW);
     digitalWrite(13, !digitalRead(13));
     if (counter1 == 0 )
-    { 
+    {
       while (digitalRead(player1Btn) == HIGH)
       {
         if ((seconds == 0) && (minutes == 0))
         {
-          lcd.setCursor(1, 1);
-          lcd.print("      ");
-          lcd.print(String("00") + String(":") + String("00") );
+          playerTimeOut(1);
+          whoIsWinner(2);
         }
-        
+
         else
         {
-          
-          while (oneTimePerPress) {
-              if ((((bonusTime + seconds)%bonusTime)<60))  seconds =(seconds+bonusTime)%60 ;
-              else {minutes++ ;   seconds =(seconds+bonusTime)%60;}
-              oneTimePerPress = false ; 
-             } 
-          
-          delay(1000);
+
+          while (bonusFlag1) {
+            if ((((bonusTime + seconds) % bonusTime) < 60))  seconds = (seconds + bonusTime) % 60 ;
+            else {
+              minutes++ ;
+              seconds = (seconds + bonusTime) % 60;
+            }
+            bonusFlag1 = false ;
+          }
+          delay(200);
+          lcd.setCursor(1, 1);
+          lcd.print("      ");
           lcd.setCursor(1, 1);
           lcd.print(minutes + String(":") + seconds-- );
           if ((seconds == 0) && (minutes != 0)) {
             minutes--;
             seconds = 59;
           }
-          if ((minutes == 1) && (seconds == 0)) seconds = 59;
+          else if ((minutes == 1) && (seconds == 0)) seconds = 59;
         }
 
       }
@@ -221,7 +213,7 @@ void loop()
       counter1 = 0 ;
       lcd.setCursor(1, 1);
       lcd.print(minutes + String(":") + seconds );
-      oneTimePerPress = true ; 
+      bonusFlag1 = true ;
     }
 
   }
@@ -235,13 +227,22 @@ void loop()
       {
         if ((seconds2 == 0) && (minutes2 == 0))
         {
-          lcd.setCursor(10, 1);
-          lcd.print("      ");
-          lcd.print(String("00") + String(":") + String("00") );
+          playerTimeOut(2);
+          whoIsWinner(1);
         }
         else
         {
-          delay(1000);
+          while (bonusFlag2) {
+            if ((((bonusTime + seconds2) % bonusTime) < 60))  seconds2 = (seconds2 + bonusTime) % 60 ;
+            else {
+              minutes2++ ;
+              seconds2 = (seconds2 + bonusTime) % 60;
+            }
+            bonusFlag2 = false ;
+          }
+          delay(200);
+          lcd.setCursor(10, 1);
+          lcd.print("      ");
           lcd.setCursor(10, 1);
           lcd.print(minutes2 + String(":") + seconds2-- );
           if ((seconds2 == 0) && (minutes2 != 0)) {
@@ -259,8 +260,59 @@ void loop()
       counter2 = 0 ;
       lcd.setCursor(10, 1);
       lcd.print(minutes2 + String(":") + seconds2 );
+      bonusFlag2 = true ;
     }
 
 
   }
 }
+
+
+
+void playerTimeOut(byte player) {
+  if (player == 1)
+  {
+    lcd.setCursor(1, 1);
+    lcd.print("      ");
+    lcd.setCursor(1, 1);
+    lcd.print(String("00") + String(":") + String("00") );
+  }
+
+  else if (player == 2) {
+    lcd.setCursor(10, 1);
+    lcd.print("      ");
+    lcd.setCursor(10, 1);
+    lcd.print(String("00") + String(":") + String("00") );
+  }
+}
+
+void whoIsWinner (byte winner)
+{
+  lcd.clear();
+  for (byte a = 0 ; a < 10 ; a++)
+  {
+    lcd.setCursor(0, 0);
+    lcd.print(String("P") + winner + String(" Winner Winner"));
+    lcd.setCursor(0, 1);
+    lcd.print(" Chicken Dinner ");
+    lcd.noDisplay();
+    delay(200);
+    lcd.display();
+    delay(200);
+  }
+}
+
+void goToSleep(void){
+  while (digitalRead(enterBtn) && digitalRead(upBtn) && digitalRead(downBtn))
+  {
+    timePassed = millis() / 1000;
+    if (timePassed >= timeToSleep)
+    {
+      /* turn off lcd light */
+      digitalWrite(backLight, LOW);
+      set_sleep_mode(SLEEP_MODE_PWR_DOWN);   // sleep mode is set here
+      sleep_enable();
+      sleep_mode();
+    }
+  }
+  }
