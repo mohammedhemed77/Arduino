@@ -17,6 +17,9 @@ const byte player2Btn = 12 ;
 byte pressCount = 0 ;
 boolean bonusFlag1 = true;
 boolean bonusFlag2 = true;
+boolean winnerIsPlayerOne = false ; 
+boolean winnerIsPlayerTwo = false ; 
+boolean gameStarted = false ; 
 /* time variables */
 byte minutes = 0 ;
 byte minutes2 = 0 ;
@@ -45,6 +48,7 @@ void start ()
 
 void setup()
 {
+  
   pinMode(enterBtn , INPUT_PULLUP);
   pinMode(upBtn , INPUT_PULLUP);
   pinMode(downBtn , INPUT_PULLUP);
@@ -55,6 +59,7 @@ void setup()
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
+     
   /* initilaization msg */
   /***********************/
   for (byte a = 0 ; a < 5 ; a++)
@@ -160,14 +165,14 @@ void loop()
     {
       pressCount = 0;
       start();
-
+      gameStarted = true ;  
     }
 
   }
 
 
 
-  if (digitalRead(player1Btn) == LOW)
+  if ((digitalRead(player1Btn) == LOW)&& (gameStarted == true))
   {
 
     while (digitalRead(player1Btn) == LOW);
@@ -179,17 +184,18 @@ void loop()
         if ((seconds == 0) && (minutes == 0))
         {
           playerTimeOut(1);
-          whoIsWinner(2);
+          winnerIsPlayerTwo = true ; 
+          break; 
         }
-
+        
         else
         {
 
           while (bonusFlag1) {
-            if ((((bonusTime + seconds) % bonusTime) < 60))  seconds = (seconds + bonusTime) % 60 ;
+            if ((((bonusTime + seconds) % bonusTime) < 60))  seconds = ((seconds + bonusTime) %60) + 1 ;
             else {
               minutes++ ;
-              seconds = (seconds + bonusTime) % 60;
+              seconds = ((seconds + bonusTime) % 60) + 1;
             }
             bonusFlag1 = false ;
           }
@@ -197,7 +203,7 @@ void loop()
           lcd.setCursor(1, 1);
           lcd.print("      ");
           lcd.setCursor(1, 1);
-          lcd.print(minutes + String(":") + seconds-- );
+          lcd.print(minutes + String(":") + --seconds );
           if ((seconds == 0) && (minutes != 0)) {
             minutes--;
             seconds = 59;
@@ -214,10 +220,12 @@ void loop()
       lcd.setCursor(1, 1);
       lcd.print(minutes + String(":") + seconds );
       bonusFlag1 = true ;
+      
     }
 
   }
-  else if (digitalRead(player2Btn) == LOW )
+  
+  else if ((digitalRead(player2Btn) == LOW )&& (gameStarted == true))
   {
     while (digitalRead(player2Btn) == LOW);
     digitalWrite(13, !digitalRead(13));
@@ -228,7 +236,8 @@ void loop()
         if ((seconds2 == 0) && (minutes2 == 0))
         {
           playerTimeOut(2);
-          whoIsWinner(1);
+          winnerIsPlayerOne = true ;
+          break ;  
         }
         else
         {
@@ -251,7 +260,6 @@ void loop()
           }
           if ((minutes2 == 1) && (seconds2 == 0)) seconds2 = 59;
         }
-
       }
       counter2 ++ ;
     }
@@ -265,6 +273,8 @@ void loop()
 
 
   }
+ 
+ 
 }
 
 
@@ -286,10 +296,14 @@ void playerTimeOut(byte player) {
   }
 }
 
-void whoIsWinner (byte winner)
-{
+void whoIsWinner ()
+{ 
+  byte winner = 0 ; 
+  if      (winnerIsPlayerOne == true ) winner = 1 ; 
+  else if (winnerIsPlayerTwo == true ) winner = 2 ; 
+  
   lcd.clear();
-  for (byte a = 0 ; a < 10 ; a++)
+  for (byte a = 0 ; a < 10 ,((winner == 1)||(winner == 2)); a++)
   {
     lcd.setCursor(0, 0);
     lcd.print(String("P") + winner + String(" Winner Winner"));
