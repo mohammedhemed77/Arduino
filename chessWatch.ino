@@ -14,6 +14,7 @@ const byte upBtn = 8 ;
 const byte downBtn = 9 ;
 const byte player1Btn = 11 ;
 const byte player2Btn = 12 ;
+
 byte pressCount = 0 ;
 boolean bonusFlag1 = true;
 boolean bonusFlag2 = true;
@@ -242,7 +243,7 @@ void loop()
         else
         {
           while (bonusFlag2) {
-            if ((((bonusTime + seconds2) % bonusTime) < 60))  seconds2 = (seconds2 + bonusTime) % 60 ;
+            if ((((bonusTime + seconds2) % bonusTime) < 60))  seconds2 = ((seconds2 + bonusTime) %60) + 1 ;
             else {
               minutes2++ ;
               seconds2 = (seconds2 + bonusTime) % 60;
@@ -250,7 +251,7 @@ void loop()
             bonusFlag2 = false ;
           }
           delay(200);
-          lcd.setCursor(10, 1);
+          lc d.setCursor(10, 1);
           lcd.print("      ");
           lcd.setCursor(10, 1);
           lcd.print(minutes2 + String(":") + seconds2-- );
