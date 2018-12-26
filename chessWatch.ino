@@ -276,7 +276,11 @@ void startTime(byte player)
   {
 
     while ((bonusFlag1 == true )&&(winnerIsPlayerTwo == false)) {
-      if ((((bonusTime + seconds) % bonusTime) < 60))    seconds = ((seconds + bonusTime) % 60) + 1 ;
+      if ((bonusTime + seconds) < 60)   
+      {
+      seconds = ((seconds + bonusTime) % 60) + 1 ;
+      
+      }
       else {
         minutes++ ;
         seconds = ((seconds + bonusTime) % 60) + 1;
@@ -309,7 +313,7 @@ void startTime(byte player)
   else if (player == 2)
   {
     while ((bonusFlag2==true)&&(winnerIsPlayerOne == false)) {
-      if ((((bonusTime + seconds2) % bonusTime) < 60))  seconds2 = ((seconds2 + bonusTime) % 60) + 1 ;
+      if ((bonusTime + seconds2) < 60)  seconds2 = ((seconds2 + bonusTime) % 60) + 1 ;
       else {
         minutes2++ ;
         seconds2 = ((seconds2 + bonusTime) % 60) + 1;
