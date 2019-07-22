@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 #include <avr/sleep.h>
-static unsigned int index = 1 ;
+static int index = 1 ;
 // initialize the library with the numbers of the interface pins
 //               (RS-En - D a  t  a )
 LiquidCrystal lcd(2, 3  , 4, 5, 6, 7);
@@ -14,6 +14,9 @@ const byte upBtn = 8 ;
 const byte downBtn = 9 ;
 const byte player1Btn = 11 ;
 const byte player2Btn = 12 ;
+
+const byte MAX_MINUTES = 180  ; 
+const byte MAX_BONUS =  59; 
 
 byte pressCount = 0 ;
 boolean bonusFlag1 = true;
@@ -89,46 +92,50 @@ void setup()
 void loop()
 {
   
-  whoIsWinner ();
+  
   digitalWrite (backLight, HIGH);
   if (digitalRead(downBtn) == LOW )
   {
     while (digitalRead(downBtn) == LOW);
-    if (bonusTime == 0)
+    if (pressCount == 0)
     {
       lcd.setCursor(0, 1);
       lcd.print("                ");
+      if (index == 0) index = MAX_MINUTES+1  ; 
       lcd.setCursor(0, 1);
       lcd.print(String ("* ") + --index + String(" mins"));
-      if (index == 0) index = 90 ;
+      
     }
-    else
+    else if (pressCount == 1)
     {
       lcd.setCursor(0, 1);
       lcd.print("                ");
+      if (bonusTime == 0) bonusTime = MAX_BONUS+1 ;
       lcd.setCursor(0, 1);
       lcd.print(String("* ") + --bonusTime + String(" sec"));
-      if (bonusTime == 0) bonusTime = 60 ;
+      
     }
   }      
   else if (digitalRead(upBtn) == LOW)
   {
     while (digitalRead(upBtn) == LOW);
-    if (bonusTime == 0)
+    if (pressCount == 0)
     {
       lcd.setCursor(0, 1);
       lcd.print("                ");
+      if (index == MAX_MINUTES) index = -1 ;
       lcd.setCursor(0, 1);
       lcd.print(String("* ") + ++index + String(" mins"));
-      if (index == 90) index = 0 ;
+      
     }
-    else
+    else if (pressCount == 1)
     {
       lcd.setCursor(0, 1);
       lcd.print("                ");
+      if (bonusTime == MAX_BONUS) bonusTime = -1 ;
       lcd.setCursor(0, 1);
       lcd.print(String("* ") + ++bonusTime + String(" sec"));
-      if (bonusTime == 60) bonusTime = 1 ;
+      
     }
   }
 
@@ -160,7 +167,7 @@ void loop()
     }
     else if (pressCount == 2)
     {
-      pressCount = 0;
+      //pressCount = 0;
       start();
       gameStarted = true ;
     }
@@ -177,7 +184,8 @@ void loop()
     stopTime(1);
     while ((digitalRead(player1Btn) == HIGH)&& (digitalRead(player2Btn) == HIGH)&&(winnerIsPlayerTwo == false))
     { 
-    startTime(2);
+    updatePlayerTwoBonus();
+    startPlayerTwoTime();
        
     }
   }
@@ -189,7 +197,8 @@ void loop()
     stopTime(2);
     while ((digitalRead(player2Btn) == HIGH)&&(digitalRead(player1Btn) == HIGH)&&(winnerIsPlayerOne == false))
     {
-    startTime(1);
+    updatePlayerOneBonus();
+    startPlayerOneTime();
     }
   }
   
@@ -205,6 +214,7 @@ void playerTimeOut(byte player) {
     lcd.print("      ");
     lcd.setCursor(1, 1);
     lcd.print(String("00") + String(":") + String("00") );
+    
   }
 
   else if (player == 2) {
@@ -212,6 +222,7 @@ void playerTimeOut(byte player) {
     lcd.print("      ");
     lcd.setCursor(10, 1);
     lcd.print(String("00") + String(":") + String("00") );
+    
   }
 }
 
@@ -228,13 +239,8 @@ void whoIsWinner ()
   for (byte a = 0 ; a < 10 , ((winner == 1) || (winner == 2)); a++)
   {
     lcd.setCursor(0, 0);
-    lcd.print(String("P") + winner + String(" Winner Winner"));
-    lcd.setCursor(0, 1);
-    lcd.print(" Chicken Dinner ");
-    lcd.noDisplay();
-    delay(200);
-    lcd.display();
-    delay(200);
+    lcd.print(String("Player(") + winner + String(")Winner!"));
+    lcd.flush();
   }
   }
 }
@@ -270,74 +276,63 @@ void stopTime (byte player) {
 
 }
 
-void startTime(byte player)
-{
-  if (player == 1)
-  {
 
-    while ((bonusFlag1 == true )&&(winnerIsPlayerTwo == false)) {
-      if ((bonusTime + seconds) < 60)   
+void updatePlayerOneBonus() {
+      if ((bonusFlag1 == true ) && (winnerIsPlayerTwo == false))
       {
-      seconds = ((seconds + bonusTime) % 60) + 1 ;
-      
+        if ((bonusTime + seconds) < 60)
+          seconds = ((seconds + bonusTime) % 60) + 1 ;
+        else {
+          minutes++ ;
+          seconds = ((seconds + bonusTime) % 60) + 1;
+        }
+        bonusFlag1 = false ;
       }
-      else {
-        minutes++ ;
-        seconds = ((seconds + bonusTime) % 60) + 1;
-      }
-      bonusFlag1 = false ;
     }
-   if ((seconds == 0) && (minutes == 0))
-        {
-          playerTimeOut(1);
-          winnerIsPlayerTwo = true ;
-  //        break;
-        }  
-    
-    else 
-    {
-    delay(200);
-    lcd.setCursor(1, 1);
-    lcd.print("      ");
-    lcd.setCursor(1, 1);
-    lcd.print(minutes + String(":") + --seconds );
-    if ((seconds == 0) && (minutes != 0)) {
-      minutes--;
-      seconds = 59;
-    }
-    if ((minutes == 1) && (seconds == 0)) seconds = 59;
-   }
-  
-  }
-  
-  else if (player == 2)
-  {
-    while ((bonusFlag2==true)&&(winnerIsPlayerOne == false)) {
-      if ((bonusTime + seconds2) < 60)  seconds2 = ((seconds2 + bonusTime) % 60) + 1 ;
+
+     void updatePlayerTwoBonus() { 
+     
+     if ((bonusFlag2 == true) && (winnerIsPlayerOne == false)) 
+     {
+      if ((bonusTime + seconds2) < 60)  
+         seconds2 = ((seconds2 + bonusTime) % 60) + 1 ;
       else {
         minutes2++ ;
         seconds2 = ((seconds2 + bonusTime) % 60) + 1;
       }
       bonusFlag2 = false ;
     }
-    
-    if ((seconds2 == 0) && (minutes2 == 0))
-        {
-          playerTimeOut(2);
-          winnerIsPlayerOne = true ;
-//          break ;
-        }    
-    else {
-    delay(200);
-    lcd.setCursor(10, 1);
-    lcd.print("      ");
-    lcd.setCursor(10, 1);
-    lcd.print(minutes2 + String(":") + --seconds2 );
-    if ((seconds2 == 0) && (minutes2 != 0)) {
-      minutes2--;
-      seconds2 = 59;
-    }
-    if ((minutes2 == 1) && (seconds2 == 0)) seconds2 = 59;
-    }
-  }
-}
+     }
+    void startPlayerOneTime()
+      {      
+      if ((millis()%200 == 0)&&!winnerIsPlayerTwo)
+      {
+      lcd.setCursor(1, 1);
+      lcd.print("      ");
+      lcd.setCursor(1, 1);
+      lcd.print(minutes + String(":") + --seconds );
+      }
+      if ((seconds == 0) && (minutes != 0)) {
+        minutes--;
+        seconds = 60;
+      }
+      if ((minutes == 1) && (seconds == 0)) seconds = 59;
+      if ((minutes == 0) && (seconds == 0)) {winnerIsPlayerTwo = true ; whoIsWinner(); /*delay(100);*/}
+      }
+
+ void startPlayerTwoTime()
+   {      
+    if ((millis()%200 == 0)&&!winnerIsPlayerOne)
+    {  
+      lcd.setCursor(10, 1);
+      lcd.print("      ");
+      lcd.setCursor(10, 1);
+      lcd.print(minutes2 + String(":") + --seconds2 );
+    } 
+      if ((seconds2 == 0) && (minutes2 != 0)) {
+        minutes2--;
+        seconds2 = 60;
+      }
+      if ((minutes2 == 1) && (seconds2 == 0)) seconds2 = 59;
+      if ((minutes2 == 0) && (seconds2 == 0)) {winnerIsPlayerOne = true ; whoIsWinner(); /*delay(100);*/}
+   }
