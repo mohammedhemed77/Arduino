@@ -1,10 +1,10 @@
-/****************************************************** 
-* Play with arduino to make RTC in breadboard using   * 
-* 4 digits seven segments using multplexing           * 
-* 4 transistors 2n222A                                *
-* DS1307 RTC                                          *
-* But the hardware has issue RTC IC is not accurate   *
-********************************************************/
+/********************************************************* 
+* Play with arduino to make RTC in breadboard using      * 
+* 4 digits seven segments using multplexing              * 
+* 4 transistors 2n222A for each digit with 1K (4* res)   *       
+* 1307 RTC                                               *
+* By : Mohammed Hemed                                    *
+**********************************************************/
 
 #include <Wire.h>
 #include <I2C_RTC.h>
@@ -33,93 +33,53 @@ digitalWrite(D4,LOW);
 void display_digit(uint8_t num){
 switch (num){
         case 0 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,HIGH);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);         digitalWrite(c,HIGH);
+            digitalWrite(d,HIGH);        digitalWrite(e,HIGH);          digitalWrite(f,HIGH);         
             digitalWrite(g,LOW); 
             break; 
         case 1 :
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(a,LOW);
-            digitalWrite(d,LOW);
-            digitalWrite(e,LOW);
-            digitalWrite(f,LOW);
+            digitalWrite(b,HIGH);        digitalWrite(c,HIGH);        digitalWrite(a,LOW);
+            digitalWrite(d,LOW);         digitalWrite(e,LOW);         digitalWrite(f,LOW);
             digitalWrite(g,LOW); 
             break;
         case 2 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(g,HIGH);
-            digitalWrite(e,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(c,LOW);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);        digitalWrite(g,HIGH);
+            digitalWrite(e,HIGH);        digitalWrite(d,HIGH);        digitalWrite(c,LOW);
             digitalWrite(f,LOW); 
             break;
         case 3 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,LOW);
-            digitalWrite(f,LOW);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);        digitalWrite(c,HIGH);
+            digitalWrite(d,HIGH);        digitalWrite(e,LOW);        digitalWrite(f,LOW);
             digitalWrite(g,HIGH); 
             break;
         case 4 :
-            digitalWrite(a,LOW);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,LOW);
-            digitalWrite(e,LOW);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,LOW);        digitalWrite(b,HIGH);        digitalWrite(c,HIGH);
+            digitalWrite(d,LOW);        digitalWrite(e,LOW);        digitalWrite(f,HIGH);
             digitalWrite(g,HIGH); 
             break;
         case 5 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,LOW);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,LOW);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,HIGH);        digitalWrite(b,LOW);        digitalWrite(c,HIGH);
+            digitalWrite(d,HIGH);        digitalWrite(e,LOW);        digitalWrite(f,HIGH);
             digitalWrite(g,HIGH); 
             break;
         case 6 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,LOW);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,HIGH);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,HIGH);        digitalWrite(b,LOW);        digitalWrite(c,HIGH);        
+            digitalWrite(d,HIGH);        digitalWrite(e,HIGH);       digitalWrite(f,HIGH);
             digitalWrite(g,HIGH);
             break;
         case 7 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,LOW);
-            digitalWrite(e,LOW);
-            digitalWrite(f,LOW);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);        digitalWrite(c,HIGH);
+            digitalWrite(d,LOW);         digitalWrite(e,LOW);         digitalWrite(f,LOW);
             digitalWrite(g,LOW);  
             break;
         case 8 :
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,HIGH);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);        digitalWrite(c,HIGH);
+            digitalWrite(d,HIGH);        digitalWrite(e,HIGH);        digitalWrite(f,HIGH);
             digitalWrite(g,HIGH);
             break;
         case 9 :  
-            digitalWrite(a,HIGH);
-            digitalWrite(b,HIGH);
-            digitalWrite(c,HIGH);
-            digitalWrite(d,HIGH);
-            digitalWrite(e,LOW);
-            digitalWrite(f,HIGH);
+            digitalWrite(a,HIGH);        digitalWrite(b,HIGH);        digitalWrite(c,HIGH);
+            digitalWrite(d,HIGH);        digitalWrite(e,LOW);         digitalWrite(f,HIGH);
             digitalWrite(g,HIGH);
             break;
 }
@@ -137,7 +97,7 @@ for (int i = 3 ; i <=13; i++)  {pinMode(i,OUTPUT);}
  //attachInterrupt(digitalPinToInterrupt(btn), set_time, LOW);
  RTC.begin();
  //RTC.setOutPin(SQW001Hz);
- //Serial.begin(9600);
+ Serial.begin(9600);
   
 }
 
@@ -147,6 +107,7 @@ void loop() {
   {
   RTC.setHours(map(analogRead(A2),0,1023,1,13));
   RTC.setMinutes(map(analogRead(A3),0,1023,0,60));  
+  RTC.setSeconds(0);        
   }
   /*
   Serial.print(RTC.getHours());
